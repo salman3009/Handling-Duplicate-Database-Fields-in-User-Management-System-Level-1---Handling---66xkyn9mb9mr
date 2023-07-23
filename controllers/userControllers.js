@@ -63,6 +63,13 @@ Status: 500 Internal Server Error
 const createUser = handleAsyncErrors(async (req, res) => {
   const { username, email, password } = req.body;
   //Add Error Handling
+  if(!username || !email || !password){
+    return AppError(res,400,'Username, email, and password are required fields');
+  }
+  const existerUser = await User.findOne({$or:[{username},{email}]});
+  if(existerUser){
+    return AppError(res,409,'Username or email already exists');
+  }
   const user = new User({ username, email, password });
   await user.save();
   res.status(201).json({ message: 'User created successfully', user });
